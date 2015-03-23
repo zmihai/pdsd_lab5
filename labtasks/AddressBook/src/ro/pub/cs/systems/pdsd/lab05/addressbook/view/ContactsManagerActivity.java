@@ -255,18 +255,12 @@ public class ContactsManagerActivity extends Activity {
 									new String[] {
 											getIntent().getStringExtra(Constants.CONTACT_ID)
 									})
-								/*.withValue(
-										ContactsContract.Data.MIMETYPE,
-										ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)*/
 								.withValue(
 										ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
 										contactNameEditText.getText().toString())
 								.build());
-						System.out.println("se modifica numele "+contactNameEditText.getText().toString());
 						index = 0;
-						System.out.println("contactPhoneNumberControls"+contactPhoneNumberControls.size()+"/"+ finalContactPhones.size());
 						while (index < contactPhoneNumberControls.size()) {
-							System.out.println("index="+index);
 							contentProviderOperations.add(ContentProviderOperation
 									.newUpdate(ContactsContract.Data.CONTENT_URI)
 									.withSelection(
@@ -280,9 +274,6 @@ public class ContactsManagerActivity extends Activity {
 												String.valueOf(Utilities.convertIndexToPhoneType(finalContactPhones.get(index/2).getType()))
 												
 									})
-									/*.withValue(
-											ContactsContract.Data.MIMETYPE,
-											ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)*/
 									.withValue(
 											ContactsContract.CommonDataKinds.Phone.NUMBER,
 											((EditText)contactPhoneNumberControls.get(index)).getText().toString())
@@ -290,13 +281,10 @@ public class ContactsManagerActivity extends Activity {
 											ContactsContract.CommonDataKinds.Phone.TYPE,
 											Utilities.convertIndexToPhoneType(((Spinner)contactPhoneNumberControls.get(index+1)).getSelectedItemPosition()))
 									.build());
-							System.out.println("se modifica telefonul "+((EditText)contactPhoneNumberControls.get(index)).getText().toString()+"/"+Utilities.convertIndexToPhoneType(((Spinner)contactPhoneNumberControls.get(index+1)).getSelectedItemPosition()));
 							index += 2;
 						}
 						index = 0;
-						System.out.println("contactEmailAddressControls="+contactEmailAddressControls+"/"+finalContactEmails.size());
 						while (index < contactEmailAddressControls.size()) {
-							System.out.println("index="+index);
 							contentProviderOperations.add(ContentProviderOperation
 									.newUpdate(ContactsContract.Data.CONTENT_URI)
 									.withSelection(
@@ -309,9 +297,6 @@ public class ContactsManagerActivity extends Activity {
 												finalContactEmails.get(index/2).getValue(),
 												String.valueOf(Utilities.convertIndexToEmailType(finalContactEmails.get(index/2).getType()))
 										})
-									/*.withValue(
-											ContactsContract.Data.MIMETYPE,
-											ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)*/
 									.withValue(
 											ContactsContract.CommonDataKinds.Email.ADDRESS,
 											((EditText)contactEmailAddressControls.get(index)).getText().toString())
@@ -319,12 +304,10 @@ public class ContactsManagerActivity extends Activity {
 											ContactsContract.CommonDataKinds.Email.TYPE,
 											Utilities.convertIndexToEmailType(((Spinner)contactEmailAddressControls.get(index+1)).getSelectedItemPosition()))
 									.build());
-							System.out.println("se modifica adresa de posta electronica "+((EditText)contactEmailAddressControls.get(index)).getText().toString()+"/"+Utilities.convertIndexToEmailType(((Spinner)contactEmailAddressControls.get(index+1)).getSelectedItemPosition()));
 							index += 2;
 						}						
 						break;						
 				}
-				
 				
 				try {
 					getContentResolver().applyBatch(ContactsContract.AUTHORITY, contentProviderOperations);

@@ -212,7 +212,6 @@ public class ContactAdapter extends BaseAdapter implements LoaderManager.LoaderC
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		data = new ArrayList<Contact>();
 		if (cursor.getCount() != 0) {
-			Log.d(Constants.TAG, "Found "+cursor.getCount()+" contacts");
 			cursor.moveToFirst();
 			do {
 				Contact contact = new Contact();

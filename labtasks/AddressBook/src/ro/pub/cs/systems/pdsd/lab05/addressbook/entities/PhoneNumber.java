@@ -16,7 +16,6 @@ public class PhoneNumber extends Entity {
 	
 	public PhoneNumber(Parcel parcel) {
 		String[] data = new String[2];
-
 		parcel.readStringArray(data);
         this.setValue(data[0]);
         this.setType(Integer.parseInt(data[1]));
@@ -24,7 +23,6 @@ public class PhoneNumber extends Entity {
 
 	@Override
 	public int convertTypeToIndex(String type) {
-		System.out.println("type="+type+" "+type.equals(Constants.TYPE_HOME)+" "+type.equals(Constants.TYPE_MOBILE)+" "+type.equals(Constants.TYPE_WORK));
 		if (type.equals(Constants.TYPE_HOME)) {
 			return Constants.PHONE_TYPE_HOME;
 		}

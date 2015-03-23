@@ -24,7 +24,6 @@ public class PhoneNumber extends Entity {
 
 	@Override
 	public int convertTypeToIndex(String type) {
-		System.out.println("type="+type+" "+type.equals(Constants.TYPE_HOME)+" "+type.equals(Constants.TYPE_MOBILE)+" "+type.equals(Constants.TYPE_WORK));
 		if (type.equals(Constants.TYPE_HOME)) {
 			return Constants.PHONE_TYPE_HOME;
 		}

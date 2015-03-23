@@ -94,7 +94,6 @@ public class ContactAdditionalDetailsFragment extends Fragment implements Loader
 							type = getActivity().getResources().getString(R.string.other);
 							break;
 					}
-					//contactPhonesTextView.setText(((contactPhonesTextView.getText()!=null && !contactPhonesTextView.getText().toString().isEmpty())?(contactPhonesTextView.getText().toString()+"\n"):"")+type+" "+data1);
 					phoneContent.append(type+" "+data1+"\n");
 				}
 				if(cursor.getString(cursor.getColumnIndex(PROJECTION[MIMETYPE_INDEX])).equals(Email.CONTENT_ITEM_TYPE)) {
@@ -112,7 +111,6 @@ public class ContactAdditionalDetailsFragment extends Fragment implements Loader
 							type = getActivity().getResources().getString(R.string.other);
 							break;
 					}
-					//contactEmailsTextView.setText(((contactEmailsTextView.getText()!=null & !contactEmailsTextView.getText().toString().isEmpty())?(contactEmailsTextView.getText().toString()+"\n"):"")+type+" "+data1);
 					emailContent.append(type+" "+data1+"\n");
 				}
 			} while (cursor.moveToNext());
