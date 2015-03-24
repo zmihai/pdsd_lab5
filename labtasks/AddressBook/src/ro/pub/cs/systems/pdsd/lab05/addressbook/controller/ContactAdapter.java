@@ -1,15 +1,21 @@
 package ro.pub.cs.systems.pdsd.lab05.addressbook.controller;
 
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import ro.pub.cs.systems.pdsd.lab05.addressbook.R;
 import ro.pub.cs.systems.pdsd.lab05.addressbook.general.Constants;
+import ro.pub.cs.systems.pdsd.lab05.addressbook.general.Utilities;
 import ro.pub.cs.systems.pdsd.lab05.addressbook.model.Contact;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
@@ -24,6 +30,7 @@ import android.widget.TextView;
 public class ContactAdapter extends BaseAdapter implements LoaderManager.LoaderCallbacks<Cursor> {
 	
 	Activity context;
+	LayoutInflater inflater;
 	
 	ArrayList<Contact> data;
 	String searchCriteria;
@@ -48,6 +55,22 @@ public class ContactAdapter extends BaseAdapter implements LoaderManager.LoaderC
     private static final int STARRED_INDEX = 4;
     private static final int TIMES_CONTACTED_INDEX = 5;
     private static final int LAST_TIME_CONTACTED_INDEX = 6;
+    public final static int CONTACT_VIEW_TYPES     = 2;
+    public final static int CONTACT_VIEW_TYPE_ODD  = 0;
+    public final static int CONTACT_VIEW_TYPE_EVEN = 1;
+     
+    @Override
+    public int getViewTypeCount() {
+    	return CONTACT_VIEW_TYPES;
+    }
+     
+    @Override
+    public int getItemViewType(int position) {
+    	if (position % 2 == 0) {
+    		return CONTACT_VIEW_TYPE_ODD;
+    	}
+    	return CONTACT_VIEW_TYPE_EVEN;
+    }
 	
     private static final String SELECTION = "(" + Contacts.DISPLAY_NAME + " NOTNULL) AND ("
     		+ Contacts.HAS_PHONE_NUMBER + "=1) AND ("
@@ -58,10 +81,11 @@ public class ContactAdapter extends BaseAdapter implements LoaderManager.LoaderC
     	TextView contactNameTextView, contactTimesContactedTextView, contactLastTimeContactedTextView;
     };
 
-	public ContactAdapter(Activity context) {
-		this.context = context;
-		data = new ArrayList<Contact>();
-		initData();
+    public ContactAdapter(Activity context) {
+    	this.context = context;
+    	inflater = (LayoutInflater)context.getLayoutInflater();
+    	data = new ArrayList<Contact>();
+    	initData();
 	}
 	
 	public void initData() {
@@ -75,32 +99,93 @@ public class ContactAdapter extends BaseAdapter implements LoaderManager.LoaderC
 
 	@Override
 	public int getCount() {
-		//TODO: exercise 5b
-		return -1;
-	}
+	    return data.size();
+    }
 
 	@Override
 	public Object getItem(int position) {
-		//TODO: exercise 5b
-		return null;
+		return data.get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-		//TODO: exercise 5b
-		return -1;
+		return 0;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater)context.getLayoutInflater();
-		View contactView = inflater.inflate(R.layout.contact_view, parent, false);
+		Contact contact = data.get(position);
+		View contactView;
+		ViewHolder viewHolder;
 		
-		// TODO: exercise 5
+		if (convertView == null) {
+			if (position % 2 == 0) {
+				contactView = inflater.inflate(R.layout.contact_view_even, parent, false);
+			} else {
+				contactView = inflater.inflate(R.layout.contact_view_odd, parent, false);
+			}
+			viewHolder = new ViewHolder();
+			viewHolder.contactPhotoImageView = (ImageView)contactView.findViewById(R.id.contact_photo_image_view);
+			viewHolder.contactNameTextView = (TextView)contactView.findViewById(R.id.contact_name_text_view);
+			viewHolder.contactTimesContactedTextView = (TextView)contactView.findViewById(R.id.contact_times_contacted_text_view);
+			viewHolder.contactLastTimeContactedTextView = (TextView)contactView.findViewById(R.id.contact_last_time_contacted_text_view);
+			viewHolder.contactStarredImageView = (ImageView)contactView.findViewById(R.id.contact_starred_image_view);
+			contactView.setTag(viewHolder);
+		} else {
+			contactView = convertView;
+		}
+
+	    if (getCheckedItemPosition() == position) {
+	        contactView.setBackgroundColor(context.getResources().getColor(R.color.light_blue));
+	    } else {
+	        contactView.setBackgroundColor(context.getResources().getColor(R.color.light_gray));
+	    }
+	    
+	    viewHolder = (ViewHolder)contactView.getTag();
 		
-		// TODO: exercise 7
-		
-		// TODO: exercise 8 (optional)
+	    AssetFileDescriptor assetFileDescriptor = null;
+	    try {
+	    	Uri contactPhotoUri = contact.getPhoto();
+	    	if (contactPhotoUri == Uri.EMPTY) {
+	    		viewHolder.contactPhotoImageView.setImageResource(R.drawable.contact_photo);
+	        } else {
+	        	assetFileDescriptor = context.getContentResolver().openAssetFileDescriptor(contactPhotoUri, "r");
+	        	FileDescriptor fileDescriptor = assetFileDescriptor.getFileDescriptor();
+	        	if (fileDescriptor != null) {
+	        		viewHolder.contactPhotoImageView.setImageBitmap(BitmapFactory.decodeFileDescriptor(fileDescriptor, null, null));
+	        	}
+	        }
+	    } catch (FileNotFoundException fileNotFoundException) {
+	    	Log.e(Constants.TAG, "An exception has occurred: "+fileNotFoundException.getMessage());
+	    	if (Constants.DEBUG) {
+	    		fileNotFoundException.printStackTrace();
+	    	}
+	    } finally {
+	    	if (assetFileDescriptor != null) {
+	    		try {
+	    			assetFileDescriptor.close();
+	    		} catch (IOException ioException) {
+	    			Log.e(Constants.TAG, "An exception has occurred: "+ioException.getMessage());
+	    			if (Constants.DEBUG) {
+	    				ioException.printStackTrace();
+	    			}
+	    		}
+	    	}
+	    }
+	    
+	    viewHolder.contactNameTextView.setText(contact.getName());
+	    viewHolder.contactTimesContactedTextView.setText(context.getResources().getString(R.string.times_contacted)+" "+contact.getTimesContacted());
+	    long value = contact.getLastTimeContacted();
+	    if (value != 0) {
+	    	viewHolder.contactLastTimeContactedTextView.setText(context.getResources().getString(R.string.last_time_contacted)+" "+Utilities.displayDateAndTime(value));
+	    } else {
+	    	viewHolder.contactLastTimeContactedTextView.setText(context.getResources().getString(R.string.last_time_contacted)+" -");
+	    }
+	    if (contact.getStarred() == 1) {
+	    	viewHolder.contactStarredImageView.setImageResource(R.drawable.star_set);
+	    } else {
+	    	viewHolder.contactStarredImageView.setImageResource(R.drawable.star_unset);
+	    }
 		
 		return contactView;
 	}
